@@ -6,6 +6,7 @@ const int MAX_STUDENTS = 100;
 const int MAX_COURSES = 50;
 const int MAX_ENROLLED_STUDENTS = 100;
 
+
 class Student {
 public:
     std::string name;
@@ -119,37 +120,101 @@ public:
         }
     }
 
-    void run() {
-        int choice;
-        do {
-            std::cout << "Main Menu\n";
-            std::cout << "1- Enroll a student\n2- Display Enrolled Students\n"
-                << "3- Add a course\n4- Display Available Courses\n5- Exit\n";
-            std::cout << "Press 1 to 5 to select an option: ";
-            std::cin >> choice;
+    void editStudent() {
+    int rollNumber;
+    std::cout << "Enter the Roll Number of the student you want to edit: ";
+    std::cin >> rollNumber;
 
-            switch (choice) {
-            case 1:
-                enrollStudent();
-                break;
-            case 2:
-                displayEnrolledStudents();
-                break;
-            case 3:
-                addCourse();
-                break;
-            case 4:
-                displayAvailableCourses();
-                break;
-            case 5:
-                saveDataToFile();
-                std::cout << "Exiting the system.\n";
-                break;
-            default:
-                std::cout << "Invalid choice. Please try again.\n";
-            }
-        } while (choice != 5);
+    int index = -1;
+    for (int i = 0; i < studentCount; ++i) {
+        if (students[i].roll_num == rollNumber) {
+            index = i;
+            break;
+        }
     }
+
+    if (index != -1) {
+        std::cout << "Enter new information for the student:\n";
+        std::cout << "Name: ";
+        std::cin >> students[index].name;
+        std::cout << "Age: ";
+        std::cin >> students[index].age;
+        std::cout << "Contact: ";
+        std::cin >> students[index].contact;
+
+        std::cout << "Student information updated successfully.\n";
+    }
+    else {
+        std::cout << "Student with Roll Number " << rollNumber << " not found.\n";
+    }
+}
+void assignMarks() {
+    string courseCode;
+    int roll;
+    int mark;
+    cout << "Enter the code of the course to assign marks: ";
+    cin >> courseCode;
+
+    int courseIndex = findCourseIndexByCode(courseCode);
+    for (int i = 0; i < courseCount; i++)
+    {
+        if (courseCode == courses[i].code) {
+
+            cout << "enter roll number of student you want to assign marks";
+            cin >> roll;
+            for(int j=0;j<studentCount;j++)
+            {
+                if (roll == students[j].roll_num)
+                {
+                    cout << "Adding marks to roll no" << roll;
+                    cout << "enter marks out of 100";
+                    cin >> mark;
+                    students[j].marks = mark;
+                }
+            
+            }
+        }
+        else {
+            std::cout << "Course with code " << courseCode << " not found.\n";
+        }
+    }
+}
+
+
+void run() {
+    int choice;
+    do {
+        std::cout << "Main Menu\n";
+        std::cout << "1- Enroll a student\n2- Display Enrolled Students\n"
+            << "3- Add a course\n4- Display Available Courses\n5- TO Edit a Student\n6- Exit\n";
+        std::cout << "Press 1 to 5 to select an option: ";
+        std::cin >> choice;
+
+        switch (choice) {
+        case 1:
+            enrollStudent();
+            break;
+        case 2:
+            displayEnrolledStudents();
+            break;
+        case 3:
+            addCourse();
+            break;
+        case 4:
+            displayAvailableCourses();
+            break;
+        case 5:
+            editStudent();
+            break;
+        case 6:
+            saveDataToFile();
+            std::cout << "Exiting the system.\n";
+            break;
+        default:
+            std::cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 6);
+}
 };
 
 int main() {
