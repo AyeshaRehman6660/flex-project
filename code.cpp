@@ -125,61 +125,164 @@ void assignMarks() {
     cout << "Enter the code of the course to assign marks: ";
     cin >> courseCode;
 
-    int courseIndex = findCourseIndexByCode(courseCode);
-    for (int i = 0; i < courseCount; i++)
-    {
-        if (courseCode == courses[i].code) {
+    Course* targetCourse = findCourseByCode(courseCode);
 
-            cout << "enter roll number of student you want to assign marks";
-            cin >> roll;
-            for(int j=0;j<studentCount;j++)
-            {
-                if (roll == students[j].roll_num)
-                {
-                    cout << "Adding marks to roll no" << roll;
-                    cout << "enter marks out of 100";
-                    cin >> mark;
-                    students[j].marks = mark;
-                }
-            
+    if (targetCourse != nullptr) {
+        cout << "Enter roll number of the student you want to assign marks: ";
+        cin >> roll;
+
+        bool studentFound = false;
+        for (int j = 0; j < studentCount; j++) {
+            if (roll == students[j].roll_num) {
+                cout << "Adding marks to roll no " << roll << "\n";
+                cout << "Enter marks out of 100: ";
+                cin >> mark;
+                students[j].marks = mark;
+                studentFound = true;
+                cout << students[j].marks;
+                break;  // Exit the loop once the student is found
             }
         }
-        else {
-            std::cout << "Course with code " << courseCode << " not found.\n";
+
+        if (!studentFound) {
+            cout << "Student with roll number " << roll << " not found.\n";
         }
+    }
+    else {
+        cout << "Course with code " << courseCode << " not found.\n";
     }
 }
-    void run() {
-        int choice;
-        do {
-            std::cout << "Main Menu\n";
-            std::cout << "1- Enroll a student\n2- Display Enrolled Students\n"
-                << "3- Add a course\n4- Display Available Courses\n5- Exit\n";
-            std::cout << "Press 1 to 5 to select an option: ";
-            std::cin >> choice;
 
-            switch (choice) {
-            case 1:
-                enrollStudent();
-                break;
-            case 2:
-                displayEnrolledStudents();
-                break;
-            case 3:
-                addCourse();
-                break;
-            case 4:
-                displayAvailableCourses();
-                break;
-            case 5:
-                saveDataToFile();
-                std::cout << "Exiting the system.\n";
-                break;
-            default:
-                std::cout << "Invalid choice. Please try again.\n";
-            }
-        } while (choice != 5);
+Course* findCourseByCode(const string& courseCode) {
+    for (int i = 0; i < courseCount; i++) {
+        if (courseCode == courses[i].code) {
+            return &courses[i];
+        }
     }
+    return nullptr; // Course not found
+}
+
+
+void markAttendance() {
+    string courseCode;
+    int roll;
+    int p;
+    cout << "Enter the code of the course for attendance: ";
+    cin >> courseCode;
+
+    Course* targetCourse = findCourseByCode(courseCode);
+
+    if (targetCourse != nullptr) {
+        cout << "Mark attendance for course: " << targetCourse->name << "\n";
+
+        for (int j = 0; j < studentCount; j++)
+        {
+            cout << "Is " << students[j].name << " present? (1 for Yes, 0 for No): ";
+            cin >> p;
+            students[j].present = p;
+
+            cout << "Attendance marked for " << students[j].name << "\n";
+        }
+    }
+    else {
+        cout << "Course with code " << courseCode << " not found.\n";
+    }
+}
+void displayAttendance() {
+    string courseCode;
+    cout << "Enter the code of the course to display attendance: ";
+    cin >> courseCode;
+
+    Course* targetCourse = findCourseByCode(courseCode);
+
+    if (targetCourse != nullptr) {
+        cout << "Attendance for course: " << targetCourse->name << "\n";
+
+        for (int i = 0; i < targetCourse->capacity; ++i) {
+            int studentIndex = targetCourse->enrolled_students[i];
+
+            cout << "Student: " << students[studentIndex].name << "\n";
+            cout << "Roll Number: " << students[studentIndex].roll_num << "\n";
+            cout << "Attendance Status: " << (students[studentIndex].present ? "Present" : "Absent") << "\n";
+            cout << "------------------------\n";
+        }
+    }
+    else {
+        cout << "Course with code " << courseCode << " not found.\n";
+    }
+}
+void displayMarks() {
+    string courseCode;
+    cout << "Enter the code of the course to display marks: ";
+    cin >> courseCode;
+
+    Course* targetCourse = findCourseByCode(courseCode);
+
+    if (targetCourse != nullptr) {
+        cout << "Marks for course: " << targetCourse->name << "\n";
+
+        for (int i = 0; i < targetCourse->capacity; ++i) {
+            int studentIndex = targetCourse->enrolled_students[i];
+
+            cout << "Student: " << students[studentIndex].name << "\n";
+            cout << "Roll Number: " << students[studentIndex].roll_num << "\n";
+            cout << "Marks: " << (students[studentIndex].marks != -1 ? to_string(students[studentIndex].marks) : "Not Assigned") << "\n";
+            cout << "------------------------\n";
+        }
+    }
+    else {
+        cout << "Course with code " << courseCode << " not found.\n";
+    }
+}
+
+
+void run() {
+    int choice;
+    do {
+        std::cout << "Main Menu\n";
+        cout << "1- Enroll a student\n2- Display Enrolled Students\n"
+            << "3- Add a course\n4- Display Available Courses\n5- TO Edit a Student\n6- To Mark Attendance\n7- To assign marks to a student\n" 
+          <<"8-Display attendance\n 9- display marks \n 10- Exit\n";
+        std::cout << "Press 1 to 8 to select an option: ";
+        std::cin >> choice;
+
+        switch (choice) {
+        case 1:
+            enrollStudent();
+            break;
+        case 2:
+            displayEnrolledStudents();
+            break;
+        case 3:
+            addCourse();
+            break;
+        case 4:
+            displayAvailableCourses();
+            break;
+        case 5:
+            editStudent();
+            break;
+        case 6:
+            markAttendance();
+            break;
+        case 7:
+            assignMarks();
+            break;
+        case 8:
+            displayAttendance();
+            break;
+        case 9:
+            displayMarks();
+            break;
+        case 10:
+            saveDataToFile();
+            std::cout << "Exiting the system.\n";
+            break;
+        default:
+            std::cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 10);
+}
 };
 
 int main() {
