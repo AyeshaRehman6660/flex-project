@@ -1,6 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstring>
+#include <string>
+
+using namespace std;
 
 const int MAX_STUDENTS = 100;
 const int MAX_COURSES = 50;
@@ -12,6 +16,9 @@ public:
     int roll_num;
     int age;
     std::string contact;
+    bool present;
+    int marks;
+    Student() : present(false), marks(-1) {}
 };
 
 class Course {
@@ -22,6 +29,7 @@ public:
     int credits;
     int capacity;
     int enrolled_students[MAX_ENROLLED_STUDENTS];
+    Course() : capacity(0) {}
 };
 
 class System {
@@ -30,17 +38,37 @@ private:
     Course courses[MAX_COURSES];
     int studentCount = 0;
     int courseCount = 0;
+    
 
-    void saveDataToFile() {
-        std::ofstream file("data.txt");
+    void initializeCourses() {
+        for (int i = 0; i < MAX_COURSES; ++i) {
+            courses[i].capacity = 0;  // Initialize course capacities
+            for (int j = 0; j < MAX_ENROLLED_STUDENTS; ++j) {
+                courses[i].enrolled_students[j] = -1;
+            }
+        }
+    }
+
+    void saveStudentsToFile() {
+        std::ofstream file("students.txt");
         if (file.is_open()) {
             for (int i = 0; i < studentCount; ++i) {
-                file << "Student|" << students[i].name << "|" << students[i].roll_num << "|"
-                    << students[i].age << "|" << students[i].contact << "\n";
+                file << students[i].name << "|" << students[i].roll_num << "|"
+                    << students[i].age << "|" << students[i].contact << "|" << students[i].marks << "\n";
             }
+            file.close();
+            std::cout << "Student data successfully saved to file.\n";
+        }
+        else {
+            std::cout << "Unable to open students file for writing.\n";
+        }
+    }
 
+    void saveCoursesToFile() {
+        std::ofstream file("courses.txt");
+        if (file.is_open()) {
             for (int i = 0; i < courseCount; ++i) {
-                file << "Course|" << courses[i].code << "|" << courses[i].name << "|"
+                file << courses[i].code << "|" << courses[i].name << "|"
                     << courses[i].instructor << "|" << courses[i].credits << "|"
                     << courses[i].capacity << "|";
 
@@ -50,12 +78,72 @@ private:
 
                 file << "\n";
             }
-
             file.close();
+            std::cout << "Course data successfully saved to file.\n";
+        }
+        else {
+            std::cout << "Unable to open courses file for writing.\n";
         }
     }
 
+    void saveAttendanceToFile() {
+        std::ofstream file("attendance.txt");
+        if (file.is_open()) {
+            for (int i = 0; i < courseCount; ++i) {
+                for (int j = 0; j < courses[i].capacity; ++j) {
+                    int studentIndex = findStudentByRoll(courses[i].enrolled_students[j]);
+
+                    if (studentIndex != -1) {
+                        file << courses[i].code << "|" << students[studentIndex].roll_num << "|"
+                            << students[studentIndex].name << "|" << students[studentIndex].present << "\n";
+                    }
+                }
+            }
+            file.close();
+            std::cout << "Attendance data successfully saved to file.\n";
+        }
+        else {
+            std::cout << "Unable to open attendance file for writing.\n";
+        }
+    }
+
+    void saveMarksToFile() {
+        std::ofstream file("marks.txt");
+        if (file.is_open()) {
+            for (int i = 0; i < courseCount; ++i) {
+                for (int j = 0; j < courses[i].capacity; ++j) {
+                    int studentIndex = findStudentByRoll(courses[i].enrolled_students[j]);
+
+                    if (studentIndex != -1) {
+                        file << courses[i].code << "|" << students[studentIndex].roll_num << "|"
+                            << students[studentIndex].name << "|" << students[studentIndex].marks << "\n";
+                    }
+                }
+            }
+            file.close();
+            std::cout << "Marks data successfully saved to file.\n";
+        }
+        else {
+            std::cout << "Unable to open marks file for writing.\n";
+        }
+    }
+
+    int findCourseIndexByCode(const std::string& courseCode) {
+        for (int i = 0; i < courseCount; ++i) {
+            if (courses[i].code == courseCode) {
+                return i;
+            }
+        }
+        return -1; // Course not found
+    }
+
+
 public:
+    System() {
+        // Initialize courses when the System object is created
+        initializeCourses();
+    }
+
     void enrollStudent() {
         Student newStudent;
         std::cout << "Enter student information:\n";
@@ -118,171 +206,392 @@ public:
             std::cout << "-------------------\n";
         }
     }
-void assignMarks() {
-    string courseCode;
-    int roll;
-    int mark;
-    cout << "Enter the code of the course to assign marks: ";
-    cin >> courseCode;
+    void editStudent() {
+        int rollNumber;
+        std::cout << "Enter the Roll Number of the student you want to edit: ";
+        std::cin >> rollNumber;
 
-    Course* targetCourse = findCourseByCode(courseCode);
-
-    if (targetCourse != nullptr) {
-        cout << "Enter roll number of the student you want to assign marks: ";
-        cin >> roll;
-
-        bool studentFound = false;
-        for (int j = 0; j < studentCount; j++) {
-            if (roll == students[j].roll_num) {
-                cout << "Adding marks to roll no " << roll << "\n";
-                cout << "Enter marks out of 100: ";
-                cin >> mark;
-                students[j].marks = mark;
-                studentFound = true;
-                cout << students[j].marks;
-                break;  // Exit the loop once the student is found
+        int index = -1;
+        for (int i = 0; i < studentCount; ++i) {
+            if (students[i].roll_num == rollNumber) {
+                index = i;
+                break;
             }
         }
 
-        if (!studentFound) {
-            cout << "Student with roll number " << roll << " not found.\n";
+        if (index != -1) {
+            std::cout << "Enter new information for the student:\n";
+            std::cout << "Name: ";
+            std::cin >> students[index].name;
+            std::cout << "Age: ";
+            std::cin >> students[index].age;
+            std::cout << "Contact: ";
+            std::cin >> students[index].contact;
+
+            std::cout << "Student information updated successfully.\n";
+        }
+        else {
+            std::cout << "Student with Roll Number " << rollNumber << " not found.\n";
         }
     }
-    else {
-        cout << "Course with code " << courseCode << " not found.\n";
-    }
-}
+    
+    void assignMarks() {
+        string courseCode;
+        int roll;
+        int mark;
+        cout << "Enter the code of the course to assign marks: ";
+        cin >> courseCode;
 
-Course* findCourseByCode(const string& courseCode) {
-    for (int i = 0; i < courseCount; i++) {
-        if (courseCode == courses[i].code) {
-            return &courses[i];
+        Course* targetCourse = findCourseByCode(courseCode);
+
+        if (targetCourse != nullptr) {
+            cout << "Enter roll number of the student you want to assign marks: ";
+            cin >> roll;
+
+            bool studentFound = false;
+            for (int j = 0; j < studentCount; j++) {
+                if (roll == students[j].roll_num) {
+                    cout << "Adding marks to roll no " << roll << "\n";
+                    cout << "Enter marks out of 100: ";
+                    cin >> mark;
+                    students[j].marks = mark;
+                    studentFound = true;
+                    cout << students[j].marks;
+                    break;  // Exit the loop once the student is found
+                }
+            }
+
+            if (!studentFound) {
+                cout << "Student with roll number " << roll << " not found.\n";
+            }
+        }
+        else {
+            cout << "Course with code " << courseCode << " not found.\n";
         }
     }
-    return nullptr; // Course not found
-}
+
+    Course* findCourseByCode(const string& courseCode) {
+        for (int i = 0; i < courseCount; i++) {
+            if (courseCode == courses[i].code) {
+                return &courses[i];
+            }
+        }
+        return nullptr; // Course not found
+    }
 
 
-void markAttendance() {
-    string courseCode;
-    int roll;
-    int p;
-    cout << "Enter the code of the course for attendance: ";
-    cin >> courseCode;
+    void markAttendance() {
+        string courseCode;
+        int roll;
+        int p;
+        cout << "Enter the code of the course for attendance: ";
+        cin >> courseCode;
 
-    Course* targetCourse = findCourseByCode(courseCode);
+        Course* targetCourse = findCourseByCode(courseCode);
 
-    if (targetCourse != nullptr) {
-        cout << "Mark attendance for course: " << targetCourse->name << "\n";
+        if (targetCourse != nullptr) {
+            cout << "Mark attendance for course: " << targetCourse->name << "\n";
 
-        for (int j = 0; j < studentCount; j++)
-        {
-            cout << "Is " << students[j].name << " present? (1 for Yes, 0 for No): ";
-            cin >> p;
-            students[j].present = p;
+            for (int j = 0; j < studentCount; j++)
+            {
+                cout << "Is " << students[j].name << " present? (1 for Yes, 0 for No): ";
+                cin >> p;
+                students[j].present = p;
 
-            cout << "Attendance marked for " << students[j].name << "\n";
+                cout << "Attendance marked for " << students[j].name << "\n";
+            }
+        }
+        else {
+            cout << "Course with code " << courseCode << " not found.\n";
         }
     }
-    else {
-        cout << "Course with code " << courseCode << " not found.\n";
-    }
-}
-void displayAttendance() {
-    string courseCode;
-    cout << "Enter the code of the course to display attendance: ";
-    cin >> courseCode;
+    void displayAttendance() {
+        string courseCode;
+        cout << "Enter the code of the course to display attendance: ";
+        cin >> courseCode;
 
-    Course* targetCourse = findCourseByCode(courseCode);
+        Course* targetCourse = findCourseByCode(courseCode);
 
-    if (targetCourse != nullptr) {
-        cout << "Attendance for course: " << targetCourse->name << "\n";
+        if (targetCourse != nullptr) {
+            cout << "Attendance for course: " << targetCourse->name << "\n";
 
-        for (int i = 0; i < targetCourse->capacity; ++i) {
-            int studentIndex = targetCourse->enrolled_students[i];
+            for (int i = 0; i < targetCourse->capacity; ++i) {
+                int studentIndex = targetCourse->enrolled_students[i];
 
-            cout << "Student: " << students[studentIndex].name << "\n";
-            cout << "Roll Number: " << students[studentIndex].roll_num << "\n";
-            cout << "Attendance Status: " << (students[studentIndex].present ? "Present" : "Absent") << "\n";
-            cout << "------------------------\n";
+                cout << "Student: " << students[studentIndex].name << "\n";
+                cout << "Roll Number: " << students[studentIndex].roll_num << "\n";
+                cout << "Attendance Status: " << (students[studentIndex].present ? "Present" : "Absent") << "\n";
+                cout << "------------------------\n";
+            }
+        }
+        else {
+            cout << "Course with code " << courseCode << " not found.\n";
         }
     }
-    else {
-        cout << "Course with code " << courseCode << " not found.\n";
-    }
-}
-void displayMarks() {
-    string courseCode;
-    cout << "Enter the code of the course to display marks: ";
-    cin >> courseCode;
+    void displayMarks() {
+        string courseCode;
+        cout << "Enter the code of the course to display marks: ";
+        cin >> courseCode;
 
-    Course* targetCourse = findCourseByCode(courseCode);
+        Course* targetCourse = findCourseByCode(courseCode);
 
-    if (targetCourse != nullptr) {
-        cout << "Marks for course: " << targetCourse->name << "\n";
+        if (targetCourse != nullptr) {
+            cout << "Marks for course: " << targetCourse->name << "\n";
 
-        for (int i = 0; i < targetCourse->capacity; ++i) {
-            int studentIndex = targetCourse->enrolled_students[i];
+            for (int i = 0; i < targetCourse->capacity; ++i) {
+                int studentIndex = targetCourse->enrolled_students[i];
 
-            cout << "Student: " << students[studentIndex].name << "\n";
-            cout << "Roll Number: " << students[studentIndex].roll_num << "\n";
-            cout << "Marks: " << (students[studentIndex].marks != -1 ? to_string(students[studentIndex].marks) : "Not Assigned") << "\n";
-            cout << "------------------------\n";
+                cout << "Student: " << students[studentIndex].name << "\n";
+                cout << "Roll Number: " << students[studentIndex].roll_num << "\n";
+                cout << "Marks: " << (students[studentIndex].marks != -1 ? to_string(students[studentIndex].marks) : "Not Assigned") << "\n";
+                cout << "------------------------\n";
+            }
+        }
+        else {
+            cout << "Course with code " << courseCode << " not found.\n";
         }
     }
-    else {
-        cout << "Course with code " << courseCode << " not found.\n";
-    }
-}
+    
+        void removeStudent() {
+            int roll;
+            cout << "Enter the roll number of the student to remove: ";
+            cin >> roll;
 
+            int studentIndex = findStudentByRoll(roll);
 
-void run() {
-    int choice;
-    do {
-        std::cout << "Main Menu\n";
-        cout << "1- Enroll a student\n2- Display Enrolled Students\n"
-            << "3- Add a course\n4- Display Available Courses\n5- TO Edit a Student\n6- To Mark Attendance\n7- To assign marks to a student\n" 
-          <<"8-Display attendance\n 9- display marks \n 10- Exit\n";
-        std::cout << "Press 1 to 8 to select an option: ";
-        std::cin >> choice;
+            if (studentIndex != -1) {
+                // Remove the student from all courses
+                for (int i = 0; i < courseCount; ++i) {
+                    removeStudentFromCourse(roll, &courses[i]);
+                }
 
-        switch (choice) {
-        case 1:
-            enrollStudent();
-            break;
-        case 2:
-            displayEnrolledStudents();
-            break;
-        case 3:
-            addCourse();
-            break;
-        case 4:
-            displayAvailableCourses();
-            break;
-        case 5:
-            editStudent();
-            break;
-        case 6:
-            markAttendance();
-            break;
-        case 7:
-            assignMarks();
-            break;
-        case 8:
-            displayAttendance();
-            break;
-        case 9:
-            displayMarks();
-            break;
-        case 10:
-            saveDataToFile();
-            std::cout << "Exiting the system.\n";
-            break;
-        default:
-            std::cout << "Invalid choice. Please try again.\n";
+                // Shift the remaining students in the array
+                for (int i = studentIndex; i < studentCount - 1; ++i) {
+                    students[i] = students[i + 1];
+                }
+
+                // Decrement the student count
+                --studentCount;
+
+                cout << "Student with roll number " << roll << " removed.\n";
+            }
+            else {
+                cout << "Student with roll number " << roll << " not found.\n";
+            }
         }
-    } while (choice != 10);
-}
+
+        void removeStudentFromCourse(int roll, Course * course) {
+            for (int i = 0; i < course->capacity; ++i) {
+                if (course->enrolled_students[i] == roll) {
+                    // Shift the remaining students in the array
+                    for (int j = i; j < course->capacity - 1; ++j) {
+                        course->enrolled_students[j] = course->enrolled_students[j + 1];
+                    }
+
+                    // Decrement the course capacity
+                    --course->capacity;
+
+                    break; // Exit the loop once the student is found and removed
+                }
+            }
+        }
+
+        int findStudentByRoll(int roll) {
+            for (int i = 0; i < studentCount; ++i) {
+                if (students[i].roll_num == roll) {
+                    return i;
+                }
+            }
+            return -1; // Student not found
+        }
+
+        void registerCourse() {
+            int roll;
+            cout << "Enter the roll number of the student: ";
+            cin >> roll;
+
+            int studentIndex = findStudentByRoll(roll);
+
+            if (studentIndex != -1) {
+                string courseCode;
+                cout << "Enter the code of the course to register: ";
+                cin >> courseCode;
+
+                Course* targetCourse = findCourseByCode(courseCode);
+
+                if (targetCourse != nullptr) {
+                    // Check if the student is not already enrolled in the course
+                    if (!isStudentEnrolledInCourse(roll, targetCourse)) {
+                        // Check if there is capacity in the course
+                        if (targetCourse->capacity < MAX_ENROLLED_STUDENTS) {
+                            // Enroll the student in the course
+                            targetCourse->enrolled_students[targetCourse->capacity] = roll;
+                            ++targetCourse->capacity;
+
+                            cout << "Student with roll number " << roll << " registered for course " << targetCourse->name << "\n";
+                        }
+                        else {
+                            cout << "Course " << targetCourse->name << " is already full.\n";
+                        }
+                    }
+                    else {
+                        cout << "Student with roll number " << roll << " is already enrolled in course " << targetCourse->name << "\n";
+                    }
+                }
+                else {
+                    cout << "Course with code " << courseCode << " not found.\n";
+                }
+            }
+            else {
+                cout << "Student with roll number " << roll << " not found.\n";
+            }
+        }
+
+        bool isStudentEnrolledInCourse(int roll, Course* course) {
+            for (int i = 0; i < course->capacity; ++i) {
+                if (course->enrolled_students[i] == roll) {
+                    return true; // Student is already enrolled in the course
+                }
+            }
+            return false; // Student is not enrolled in the course
+        }
+
+        void enrolledCourses() {
+            int roll;
+            cout << "Enter the roll number of the student: ";
+            cin >> roll;
+
+            int studentIndex = findStudentByRoll(roll);
+
+            if (studentIndex != -1) {
+                cout << "Courses enrolled by student with roll number " << roll << ":\n";
+
+                for (int i = 0; i < courseCount; ++i) {
+                    if (isStudentEnrolledInCourse(roll, &courses[i])) {
+                        cout << "- " << courses[i].code<<"  "<<courses[i].name << "\n";
+                    }
+                }
+            }
+            else {
+                cout << "Student with roll number " << roll << " not found.\n";
+            }
+        }
+
+        void withdrawFromCourse() {
+            int roll;
+            cout << "Enter the roll number of the student: ";
+            cin >> roll;
+
+            int studentIndex = findStudentByRoll(roll);
+
+            if (studentIndex != -1) {
+                string courseCode;
+                cout << "Enter the code of the course to withdraw from: ";
+                cin >> courseCode;
+
+                Course* targetCourse = findCourseByCode(courseCode);
+
+                if (targetCourse != nullptr) {
+                    // Check if the student is enrolled in the course
+                    if (isStudentEnrolledInCourse(roll, targetCourse)) {
+                        // Withdraw the student from the course
+                        withdrawStudentFromCourse(roll, targetCourse);
+
+                        cout << "Student with roll number " << roll << " withdrawn from course " << targetCourse->name << "\n";
+                    }
+                    else {
+                        cout << "Student with roll number " << roll << " is not enrolled in course " << targetCourse->name << "\n";
+                    }
+                }
+                else {
+                    cout << "Course with code " << courseCode << " not found.\n";
+                }
+            }
+            else {
+                cout << "Student with roll number " << roll << " not found.\n";
+            }
+        }
+
+        void withdrawStudentFromCourse(int roll, Course* course) {
+            for (int i = 0; i < course->capacity; ++i) {
+                if (course->enrolled_students[i] == roll) {
+                    // Shift the remaining students in the array
+                    for (int j = i; j < course->capacity - 1; ++j) {
+                        course->enrolled_students[j] = course->enrolled_students[j + 1];
+                    }
+
+                    // Decrement the course capacity
+                    --course->capacity;
+
+                    break; // Exit the loop once the student is found and withdrawn
+                }
+            }
+        }
+
+
+    void run() {
+        int choice;
+        do {
+            std::cout << "Main Menu\n";
+            cout << "1- Enroll a student\n2- Display Enrolled Students\n"
+                << "3- Add a course\n4- Display Available Courses\n5- TO Edit a Student\n6- To Mark Attendance\n7- To assign marks to a student\n" 
+              <<"8-Display attendance\n 9- display marks \n 10-To remove a student\n 11-To register course\n 12- Check enrolled courses \n"
+                <<"\n 13- withdraw from a course 14- Exit\n";
+            std::cout << "Press 1 to 12 to select an option: ";
+            std::cin >> choice;
+
+            switch (choice) {
+            case 1:
+                enrollStudent();
+                break;
+            case 2:
+                displayEnrolledStudents();
+                break;
+            case 3:
+                addCourse();
+                break;
+            case 4:
+                displayAvailableCourses();
+                break;
+            case 5:
+                editStudent();
+                break;
+            case 6:
+                markAttendance();
+                break;
+            case 7:
+                assignMarks();
+                break;
+            case 8:
+                displayAttendance();
+                break;
+            case 9:
+                displayMarks();
+                break;
+            case 10:
+                removeStudent();
+                break;
+            case 11:
+                registerCourse();
+                break;
+            case 12:
+                enrolledCourses();
+                break;
+            case 13:
+                withdrawFromCourse();
+                break;
+            case 14:
+                 saveStudentsToFile();
+                saveCoursesToFile();
+                saveAttendanceToFile();
+                saveMarksToFile();
+                std::cout << "Exiting the system.\n";
+                break;
+            default:
+                std::cout << "Invalid choice. Please try again.\n";
+            }
+        } while (choice != 14);
+    }
 };
 
 int main() {
