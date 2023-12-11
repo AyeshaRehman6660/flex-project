@@ -118,7 +118,37 @@ public:
             std::cout << "-------------------\n";
         }
     }
+void assignMarks() {
+    string courseCode;
+    int roll;
+    int mark;
+    cout << "Enter the code of the course to assign marks: ";
+    cin >> courseCode;
 
+    int courseIndex = findCourseIndexByCode(courseCode);
+    for (int i = 0; i < courseCount; i++)
+    {
+        if (courseCode == courses[i].code) {
+
+            cout << "enter roll number of student you want to assign marks";
+            cin >> roll;
+            for(int j=0;j<studentCount;j++)
+            {
+                if (roll == students[j].roll_num)
+                {
+                    cout << "Adding marks to roll no" << roll;
+                    cout << "enter marks out of 100";
+                    cin >> mark;
+                    students[j].marks = mark;
+                }
+            
+            }
+        }
+        else {
+            std::cout << "Course with code " << courseCode << " not found.\n";
+        }
+    }
+}
     void run() {
         int choice;
         do {
