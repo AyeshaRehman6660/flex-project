@@ -306,52 +306,76 @@ public:
         }
     }
     void displayAttendance() {
-        string courseCode;
-        cout << "Enter the code of the course to display attendance: ";
-        cin >> courseCode;
+    string courseCode;
+    cout << "Enter the code of the course to display attendance: ";
+    cin >> courseCode;
 
-        Course* targetCourse = findCourseByCode(courseCode);
+    Course* targetCourse = findCourseByCode(courseCode);
 
-        if (targetCourse != nullptr) {
-            cout << "Attendance for course: " << targetCourse->name << "\n";
+    if (targetCourse != nullptr) {
+        int studentRoll;
+        cout << "Enter the roll number of the student: ";
+        cin >> studentRoll;
 
-            for (int i = 0; i < targetCourse->capacity; ++i) {
-                int studentIndex = targetCourse->enrolled_students[i];
+        // Check if the student is enrolled in the course
+        if (isStudentEnrolledInCourse(studentRoll, targetCourse)) {
+            // Find the student index by roll number
+            int studentIndex = findStudentByRoll(studentRoll);
 
+            if (studentIndex != -1) {
+                cout << "Attendance for course: " << targetCourse->name << "\n";
                 cout << "Student: " << students[studentIndex].name << "\n";
                 cout << "Roll Number: " << students[studentIndex].roll_num << "\n";
-                cout << "Attendance Status: " << (students[studentIndex].present ? "Present" : "Absent") << "\n";
-                cout << "------------------------\n";
+                cout << "Attendance: " << (students[studentIndex].present ? "Present" : "Absent") << "\n";
+            }
+            else {
+                cout << "Error: Student with roll number " << studentRoll << " not found.\n";
             }
         }
         else {
-            cout << "Course with code " << courseCode << " not found.\n";
+            cout << "Error: Student with roll number " << studentRoll << " is not enrolled in course " << targetCourse->name << "\n";
         }
     }
-    void displayMarks() {
-        string courseCode;
-        cout << "Enter the code of the course to display marks: ";
-        cin >> courseCode;
+    else {
+        cout << "Course with code " << courseCode << " not found.\n";
+    }
+}
 
-        Course* targetCourse = findCourseByCode(courseCode);
+void displayMarks() {
+    string courseCode;
+    cout << "Enter the code of the course to display marks: ";
+    cin >> courseCode;
 
-        if (targetCourse != nullptr) {
-            cout << "Marks for course: " << targetCourse->name << "\n";
+    Course* targetCourse = findCourseByCode(courseCode);
 
-            for (int i = 0; i < targetCourse->capacity; ++i) {
-                int studentIndex = targetCourse->enrolled_students[i];
+    if (targetCourse != nullptr) {
+        int studentRoll;
+        cout << "Enter the roll number of the student: ";
+        cin >> studentRoll;
 
+        // Check if the student is enrolled in the course
+        if (isStudentEnrolledInCourse(studentRoll, targetCourse)) {
+            // Find the student index by roll number
+            int studentIndex = findStudentByRoll(studentRoll);
+
+            if (studentIndex != -1) {
+                cout << "Marks for course: " << targetCourse->name << "\n";
                 cout << "Student: " << students[studentIndex].name << "\n";
                 cout << "Roll Number: " << students[studentIndex].roll_num << "\n";
                 cout << "Marks: " << (students[studentIndex].marks != -1 ? to_string(students[studentIndex].marks) : "Not Assigned") << "\n";
-                cout << "------------------------\n";
+            }
+            else {
+                cout << "Error: Student with roll number " << studentRoll << " not found.\n";
             }
         }
         else {
-            cout << "Course with code " << courseCode << " not found.\n";
+            cout << "Error: Student with roll number " << studentRoll << " is not enrolled in course " << targetCourse->name << "\n";
         }
     }
-    
+    else {
+        cout << "Course with code " << courseCode << " not found.\n";
+    }
+}
         void removeStudent() {
             int roll;
             cout << "Enter the roll number of the student to remove: ";
