@@ -50,83 +50,274 @@ private:
     }
 
     void saveStudentsToFile() {
-        std::ofstream file("students.txt");
-        if (file.is_open()) {
-            for (int i = 0; i < studentCount; ++i) {
-                file << students[i].name << "|" << students[i].roll_num << "|"
-                    << students[i].age << "|" << students[i].contact << "|" << students[i].marks << "\n";
-            }
-            file.close();
-            std::cout << "Student data successfully saved to file.\n";
+    std::ofstream file("students.txt");
+    if (file.is_open()) {
+        for (int i = 0; i < studentCount; ++i) {
+            file << students[i].name << "|" << students[i].roll_num << "|"
+                << students[i].age << "|" << students[i].contact << "|" << students[i].marks << "\n";
         }
-        else {
-            std::cout << "Unable to open students file for writing.\n";
-        }
+        file.close();
+        cout << "Student data successfully saved to file.\n";
     }
+    else {
+        cout << "Unable to open students file for writing.\n";
+    }
+}
 
-    void saveCoursesToFile() {
-        std::ofstream file("courses.txt");
-        if (file.is_open()) {
-            for (int i = 0; i < courseCount; ++i) {
-                file << courses[i].code << "|" << courses[i].name << "|"
-                    << courses[i].instructor << "|" << courses[i].credits << "|"
-                    << courses[i].capacity << "|";
+void loadStudentsFromFile() {
+    std::ifstream file("students.txt");
+    if (file.is_open()) {
+        while (!file.eof()) {
+            string line;
+            getline(file, line);
 
-                for (int j = 0; j < MAX_ENROLLED_STUDENTS && courses[i].enrolled_students[j] != -1; ++j) {
-                    file << courses[i].enrolled_students[j] << ",";
+            if (line.empty()) {
+                break;
+            }
+
+            stringstream ss(line);
+            string name, contact;
+            int roll, age, marks;
+
+            getline(ss, name, '|');
+            ss >> roll;
+            ss.ignore(1, '|');
+            ss >> age;
+            ss.ignore(1, '|');
+            getline(ss, contact, '|');
+            ss >> marks;
+
+            // Add the loaded student to the students array
+            students[studentCount].name = name;
+            students[studentCount].roll_num = roll;
+            students[studentCount].age = age;
+            students[studentCount].contact = contact;
+            students[studentCount].marks = marks;
+
+            // Increment the student count
+            ++studentCount;
+        }
+        file.close();
+        cout << "Student data successfully loaded from file.\n";
+    }
+    else {
+        cout << "Unable to open students file for reading.\n";
+    }
+}
+
+
+void saveCoursesToFile() {
+    std::ofstream file("courses.txt");
+    if (file.is_open()) {
+        for (int i = 0; i < courseCount; ++i) {
+            file << courses[i].code << "|" << courses[i].name << "|"
+                << courses[i].instructor << "|" << courses[i].credits << "|"
+                << courses[i].capacity << "|";
+
+            for (int j = 0; j < MAX_ENROLLED_STUDENTS && courses[i].enrolled_students[j] != -1; ++j) {
+                file << courses[i].enrolled_students[j] << ",";
+            }
+
+            file << "\n";
+        }
+        file.close();
+        cout << "Course data successfully saved to file.\n";
+    }
+    else {
+        cout << "Unable to open courses file for writing.\n";
+    }
+}
+
+void loadCoursesFromFile() {
+    std::ifstream file("courses.txt");
+    if (file.is_open()) {
+        while (!file.eof()) {
+            string line;
+            getline(file, line);
+
+            if (line.empty()) {
+                break;
+            }
+
+            stringstream ss(line);
+            string code, name, instructor;
+            int credits, capacity;
+
+            getline(ss, code, '|');
+            getline(ss, name, '|');
+            getline(ss, instructor, '|');
+            ss >> credits;
+            ss.ignore(1, '|');
+            ss >> capacity;
+            ss.ignore(1, '|');
+
+            // Add the loaded course to the courses array
+            courses[courseCount].code = code;
+            courses[courseCount].name = name;
+            courses[courseCount].instructor = instructor;
+            courses[courseCount].credits = credits;
+            courses[courseCount].capacity = capacity;
+
+            // Load enrolled students for the course
+            int studentRoll;
+            while (ss >> studentRoll) {
+                courses[courseCount].enrolled_students[courses[courseCount].capacity++] = studentRoll;
+                char comma;
+                ss >> comma; // Read the comma separator
+            }
+
+            // Increment the course count
+            ++courseCount;
+        }
+        file.close();
+        cout << "Course data successfully loaded from file.\n";
+    }
+    else {
+        cout << "Unable to open courses file for reading.\n";
+    }
+}
+
+void saveAttendanceToFile() {
+    std::ofstream file("attendance.txt");
+    if (file.is_open()) {
+        for (int i = 0; i < courseCount; ++i) {
+            for (int j = 0; j < courses[i].capacity; ++j) {
+                int studentRoll = courses[i].enrolled_students[j];
+                int studentIndex = findStudentByRoll(studentRoll);
+
+                if (studentIndex != -1) {
+                    file << courses[i].code << "|" << students[studentIndex].roll_num << "|"
+                        << students[studentIndex].name << "|" << students[studentIndex].present << "\n";
                 }
-
-                file << "\n";
             }
-            file.close();
-            std::cout << "Course data successfully saved to file.\n";
         }
-        else {
-            std::cout << "Unable to open courses file for writing.\n";
-        }
+        file.close();
+        cout << "Attendance data successfully saved to file.\n";
     }
+    else {
+        cout << "Unable to open attendance file for writing.\n";
+    }
+}
 
-    void saveAttendanceToFile() {
-        std::ofstream file("attendance.txt");
-        if (file.is_open()) {
-            for (int i = 0; i < courseCount; ++i) {
-                for (int j = 0; j < courses[i].capacity; ++j) {
-                    int studentIndex = findStudentByRoll(courses[i].enrolled_students[j]);
+void loadAttendanceFromFile() {
+    std::ifstream file("attendance.txt");
+    if (file.is_open()) {
+        while (!file.eof()) {
+            string line;
+            getline(file, line);
 
-                    if (studentIndex != -1) {
-                        file << courses[i].code << "|" << students[studentIndex].roll_num << "|"
-                            << students[studentIndex].name << "|" << students[studentIndex].present << "\n";
-                    }
+            if (line.empty()) {
+                break;
+            }
+
+            stringstream ss(line);
+            string courseCode, studentName;
+            int studentRoll;
+            bool present;
+
+            getline(ss, courseCode, '|');
+            ss >> studentRoll;
+            ss.ignore(1, '|');
+            getline(ss, studentName, '|');
+            ss >> present;
+
+            // Find the course index by code
+            int courseIndex = findCourseIndexByCode(courseCode);
+
+            if (courseIndex != -1) {
+                // Find the student index by roll number
+                int studentIndex = findStudentByRoll(studentRoll);
+
+                if (studentIndex != -1) {
+                    students[studentIndex].present = present;
+                    cout << "Attendance data loaded for " << studentName << " in course " << courses[courseIndex].name << "\n";
+                }
+                else {
+                    cout << "Error: Student with roll number " << studentRoll << " not found.\n";
                 }
             }
-            file.close();
-            std::cout << "Attendance data successfully saved to file.\n";
+            else {
+                cout << "Error: Course with code " << courseCode << " not found.\n";
+            }
         }
-        else {
-            std::cout << "Unable to open attendance file for writing.\n";
-        }
+        file.close();
+        cout << "Attendance data successfully loaded from file.\n";
     }
+    else {
+        cout << "Unable to open attendance file for reading.\n";
+    }
+}
 
-    void saveMarksToFile() {
-        std::ofstream file("marks.txt");
-        if (file.is_open()) {
-            for (int i = 0; i < courseCount; ++i) {
-                for (int j = 0; j < courses[i].capacity; ++j) {
-                    int studentIndex = findStudentByRoll(courses[i].enrolled_students[j]);
 
-                    if (studentIndex != -1) {
-                        file << courses[i].code << "|" << students[studentIndex].roll_num << "|"
-                            << students[studentIndex].name << "|" << students[studentIndex].marks << "\n";
-                    }
+void saveMarksToFile() {
+    std::ofstream file("marks.txt");
+    if (file.is_open()) {
+        for (int i = 0; i < courseCount; ++i) {
+            for (int j = 0; j < courses[i].capacity; ++j) {
+                int studentRoll = courses[i].enrolled_students[j];
+                int studentIndex = findStudentByRoll(studentRoll);
+
+                if (studentIndex != -1) {
+                    file << courses[i].code << "|" << students[studentIndex].roll_num << "|"
+                        << students[studentIndex].name << "|" << students[studentIndex].marks << "\n";
                 }
             }
-            file.close();
-            std::cout << "Marks data successfully saved to file.\n";
         }
-        else {
-            std::cout << "Unable to open marks file for writing.\n";
-        }
+        file.close();
+        cout << "Marks data successfully saved to file.\n";
     }
+    else {
+        cout << "Unable to open marks file for writing.\n";
+    }
+}
+
+void loadMarksFromFile() {
+    std::ifstream file("marks.txt");
+    if (file.is_open()) {
+        while (!file.eof()) {
+            string line;
+            getline(file, line);
+
+            if (line.empty()) {
+                break;
+            }
+
+            stringstream ss(line);
+            string courseCode, studentName;
+            int studentRoll, marks;
+
+            getline(ss, courseCode, '|');
+            ss >> studentRoll;
+            ss.ignore(1, '|');
+            getline(ss, studentName, '|');
+            ss >> marks;
+
+            // Find the course index by code
+            int courseIndex = findCourseIndexByCode(courseCode);
+
+            if (courseIndex != -1) {
+                // Find the student index by roll number
+                int studentIndex = findStudentByRoll(studentRoll);
+
+                if (studentIndex != -1) {
+                    students[studentIndex].marks = marks;
+                    cout << "Marks data loaded for " << studentName << " in course " << courses[courseIndex].name << "\n";
+                }
+                else {
+                    cout << "Error: Student with roll number " << studentRoll << " not found.\n";
+                }
+            }
+            else {
+                cout << "Error: Course with code " << courseCode << " not found.\n";
+            }
+        }
+        file.close();
+        cout << "Marks data successfully loaded from file.\n";
+    }
+    else {
+        cout << "Unable to open marks file for reading.\n";
+    }
+}
 
     int findCourseIndexByCode(const std::string& courseCode) {
         for (int i = 0; i < courseCount; ++i) {
