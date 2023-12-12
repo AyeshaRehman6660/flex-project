@@ -529,74 +529,193 @@ public:
         }
 
 
-    void run() {
-        int choice;
-        do {
-            std::cout << "Main Menu\n";
-            cout << "1- Enroll a student\n2- Display Enrolled Students\n"
-                << "3- Add a course\n4- Display Available Courses\n5- TO Edit a Student\n6- To Mark Attendance\n7- To assign marks to a student\n" 
-              <<"8-Display attendance\n 9- display marks \n 10-To remove a student\n 11-To register course\n 12- Check enrolled courses \n"
-                <<"\n 13- withdraw from a course 14- Exit\n";
-            std::cout << "Press 1 to 12 to select an option: ";
-            std::cin >> choice;
+    void MainMenu() {
+    int choice;
+    do {
+        cout << "Main Menu\n";
+        cout << "1- Enroll a student\n2- Course Registration \n 3- Attendance\n 4- Marks\n 5- Course Withdraw \n6- Exit\n";
+        cout << "Press 1 to 6 to select an option: ";
+        cin >> choice;
 
-            switch (choice) {
-            case 1:
-                enrollStudent();
-                break;
-            case 2:
-                displayEnrolledStudents();
-                break;
-            case 3:
-                addCourse();
-                break;
-            case 4:
-                displayAvailableCourses();
-                break;
-            case 5:
-                editStudent();
-                break;
-            case 6:
-                markAttendance();
-                break;
-            case 7:
-                assignMarks();
-                break;
-            case 8:
-                displayAttendance();
-                break;
-            case 9:
-                displayMarks();
-                break;
-            case 10:
-                removeStudent();
-                break;
-            case 11:
-                registerCourse();
-                break;
-            case 12:
-                enrolledCourses();
-                break;
-            case 13:
-                withdrawFromCourse();
-                break;
-            case 14:
-                 saveStudentsToFile();
-                saveCoursesToFile();
-                saveAttendanceToFile();
-                saveMarksToFile();
-                std::cout << "Exiting the system.\n";
-                break;
-            default:
-                std::cout << "Invalid choice. Please try again.\n";
-            }
-        } while (choice != 14);
-    }
+        switch (choice) {
+        case 1:
+            EnrollMenu();
+            break;
+        case 2:
+            CourseRegistrationMenu();
+            break;
+        case 3:
+            AttendanceMenu();
+            break;
+        case 4:
+            MarksMenu();
+            break;
+        case 5:
+            CourseWithdrawMenu();
+            break;
+        
+        case 6:
+             saveStudentsToFile();
+            saveCoursesToFile();
+            saveAttendanceToFile();
+            saveMarksToFile();
+            cout << "Exiting the system.\n";
+            break;
+        default:
+            cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 6);
+}
+
+void EnrollMenu()
+{
+    int choice;
+    do {
+        cout << "Enroll Menu\n";
+        cout << "1- Display already enrolled students\n2- Add a student\n3- Remove a student\n4- Edit student detail\n5- Back\n";
+        cout << "Press 1 to 5 to select an option: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            displayEnrolledStudents();
+            break;
+        case 2:
+            enrollStudent();
+            saveStudentsToFile();
+            break;
+        case 3:
+            removeStudent();
+            saveStudentsToFile();
+            break;
+        case 4:
+            editStudent();
+            saveStudentsToFile();
+            break;
+        case 5:
+            MainMenu();
+            break;
+        default:
+            cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 5);
+}
+
+void CourseRegistrationMenu()
+{
+    int choice;
+    do {
+        cout << "Course Registration Menu\n";
+        cout << "1- Add a Course\n2- Display Available courses\n3- Register in a Course\n4- Back\n";
+        cout << "Press 1 to 5 to select an option: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            addCourse();
+            saveCoursesToFile();
+            break;
+        case 2:
+            displayAvailableCourses();
+            saveCoursesToFile();
+            break;
+        case 3:
+            registerCourse();
+            saveCoursesToFile();
+            break;
+        
+        case 4:
+            MainMenu();
+            break;
+        default:
+            cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 4);
+}
+
+void AttendanceMenu()
+{
+    int choice;
+    do {
+        cout << "Atteandance Menu\n";
+        cout << "1- Display Attendance\n2- Mark Attendance\n3- Back\n";
+        cout << "Press 1 to 3 to select an option: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            displayAttendance();
+            break;
+        case 2:
+            markAttendance();
+            saveAttendanceToFile();
+            break;
+        case 3:
+            MainMenu();
+            break;
+        default:
+            cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 3);
+}
+
+void MarksMenu()
+{
+    int choice;
+    do {
+        cout << "Marks Menu\n";
+        cout << "1- Display Marks\n2- Assign Marks\n3- Back\n";
+        cout << "Press 1 to 3 to select an option: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            displayMarks();
+            break;
+        case 2:
+            assignMarks();
+            saveMarksToFile();
+            break;
+        case 3:
+            MainMenu();
+            break;
+        default:
+            cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 3);
+}
+
+void CourseWithdrawMenu()
+{
+    int choice;
+    do {
+        cout << "Course WithDraw Menu\n";
+        cout << "1- Display Enrolled Courses by a Student\n2- Drop a Course\n3- Back\n";
+        cout << "Press 1 to 3 to select an option: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            enrolledCourses();
+            break;
+        case 2:
+            withdrawFromCourse();
+            saveCoursesToFile();
+            break;
+        case 3:
+            MainMenu();
+            break;
+        default:
+            cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 3);
+}
+
 };
 
 int main() {
     System universitySystem;
-    universitySystem.run();
+    universitySystem.MainMenu();
 
     return 0;
 }
