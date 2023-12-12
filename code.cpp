@@ -471,31 +471,42 @@ public:
     }
 
 
-    void markAttendance() {
-        string courseCode;
-        int roll;
-        int p;
-        cout << "Enter the code of the course for attendance: ";
-        cin >> courseCode;
+   void markAttendance() {
+    string courseCode;
+    int roll;
+    int p;
 
-        Course* targetCourse = findCourseByCode(courseCode);
+    cout << "Enter the code of the course for attendance: ";
+    cin >> courseCode;
 
-        if (targetCourse != nullptr) {
-            cout << "Mark attendance for course: " << targetCourse->name << "\n";
+    Course* targetCourse = findCourseByCode(courseCode);
 
-            for (int j = 0; j < studentCount; j++)
-            {
-                cout << "Is " << students[j].name << " present? (1 for Yes, 0 for No): ";
+    if (targetCourse != nullptr) {
+        cout << "Enter the roll number of the student for whom you want to mark attendance: ";
+        cin >> roll;
+
+        int studentIndex = findStudentByRoll(roll);
+
+        if (studentIndex != -1) {
+            // Check if the student is enrolled in the specified course
+            if (isStudentEnrolledInCourse(roll, targetCourse)) {
+                cout << "Mark attendance for course: " << targetCourse->name << "\n";
+                cout << "Is " << students[studentIndex].name << " present? (1 for Yes, 0 for No): ";
                 cin >> p;
-                students[j].present = p;
+                students[studentIndex].present = (p == 1);
 
-                cout << "Attendance marked for " << students[j].name << "\n";
+                cout << "Attendance marked for " << students[studentIndex].name << "\n";
+            } else {
+                cout << "Error: Student with roll number " << roll << " is not enrolled in course " << targetCourse->name << "\n";
             }
+        } else {
+            cout << "Error: Student with roll number " << roll << " not found.\n";
         }
-        else {
-            cout << "Course with code " << courseCode << " not found.\n";
-        }
+    } else {
+        cout << "Course with code " << courseCode << " not found.\n";
     }
+}
+
     void displayAttendance() {
     string courseCode;
     cout << "Enter the code of the course to display attendance: ";
