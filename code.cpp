@@ -416,40 +416,7 @@ public:
         }
     }
     
-    //void assignMarks() {
-    //    string courseCode;
-    //    int roll;
-    //    int mark;
-    //    cout << "Enter the code of the course to assign marks: ";
-    //    cin >> courseCode;
-
-    //    Course* targetCourse = findCourseByCode(courseCode);
-
-    //    if (targetCourse != nullptr) {
-    //        cout << "Enter roll number of the student you want to assign marks: ";
-    //        cin >> roll;
-
-    //        bool studentFound = false;
-    //        for (int j = 0; j < studentCount; j++) {
-    //            if (roll == students[j].roll_num) {
-    //                cout << "Adding marks to roll no " << roll << "\n";
-    //                cout << "Enter marks out of 100: ";
-    //                cin >> mark;
-    //                students[j].marks = mark;
-    //                studentFound = true;
-    //                cout << students[j].marks;
-    //                break;  // Exit the loop once the student is found
-    //            }
-    //        }
-
-    //        if (!studentFound) {
-    //            cout << "Student with roll number " << roll << " not found.\n";
-    //        }
-    //    }
-    //    else {
-    //        cout << "Course with code " << courseCode << " not found.\n";
-    //    }
-    //}
+    
     void assignMarks() {
         string courseCode;
         int roll;
