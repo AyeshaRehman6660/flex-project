@@ -945,7 +945,8 @@ public:
 
 
 
-
+/// it is the main function 
+/// 
 int main() {
     System universitySystem;
     universitySystem.MainMenu();
